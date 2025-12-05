@@ -1573,8 +1573,16 @@ main(int argc, char **argv)
       
       // rjf: grab home directory
       {
-        char *home = getenv("HOME");
-        info->user_program_data_path = str8_cstring(home);
+        char *data_home = getenv("XDG_DATA_HOME");
+        if (!data_home) {
+          // default to $HOME/.local/share (https://specifications.freedesktop.org/basedir/latest/#variables)
+          data_home = getenv("HOME");
+          info->user_program_data_path = push_str8f(os_lnx_state.arena, "%S/%S",
+                                                    str8_cstring(data_home),
+                                                    str8_lit(".local/share"));
+        } else {
+          info->user_program_data_path = str8_cstring(data_home);
+        }
       }
       
       scratch_end(scratch);
